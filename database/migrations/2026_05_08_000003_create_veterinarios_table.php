@@ -13,8 +13,10 @@ return new class extends Migration
             $table->string('nombre');
             $table->string('apellido');
             $table->string('especialidad');
-            $table->string('numero_colegiado');
-            $table->string('email');
+            $table->string('numero_colegiado')->unique();
+            $table->string('email')->unique();
+            $table->timestamps();
+            $table->softDeletes();
         });
     }
 

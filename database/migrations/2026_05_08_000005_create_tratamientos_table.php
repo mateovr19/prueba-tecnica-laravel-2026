@@ -10,10 +10,12 @@ return new class extends Migration
     {
         Schema::create('tratamientos', function (Blueprint $table) {
             $table->id();
-            $table->integer('consulta_id');
+            $table->foreignId('consulta_id')->constrained()->cascadeOnDelete();
             $table->string('descripcion');
             $table->string('dosis')->nullable();
             $table->string('duracion')->nullable();
+            $table->timestamps();
+            $table->softDeletes();
         });
     }
 

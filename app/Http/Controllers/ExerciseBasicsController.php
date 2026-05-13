@@ -2,60 +2,46 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\Mascota;
-use App\models\Propietario;
+use App\Http\Requests\StoreMascotaRequest;
+use App\Http\Requests\UpdateMascotaRequest;
 
 class ExerciseBasicsController extends Controller
 {
     public function getAllPets()
     {
-        $data = \DB::select('SELECT * FROM mascotas');
-
-        return response()->json($data);
+        $data = Mascota::with('propietario')->paginate(15);
+        return response()->json($data, 200);
     }
 
-    public function save(Request $r)
+    public function save(StoreMascotaRequest $request)
     {
-        $m = new Mascota();
-        $m->nombre      = $r->nombre;
-        $m->especie     = $r->especie;
-        $m->raza        = $r->raza;
-        $m->peso        = $r->peso;
-        $m->fecha_nac   = $r->fecha_nacimiento;
-        $m->propietario = $r->propietario_id;
-        $m->save();
-
-        return response()->json(['ok' => true]);
+        $mascota = Mascota::create($request->validated());
+        $mascota->load('propietario');
+        return response()->json($mascota, 201);
     }
 
     public function getPet($id)
     {
-        $mascota = \DB::select('SELECT * FROM mascotas WHERE id = ' . $id);
+        $mascota = Mascota::with('propietario')->findOrFail($id);
 
-        $dueno = \DB::select('SELECT * FROM propietarios WHERE id = ' . $mascota[0]->id_propietario);
-
-        return response()->json([
-            'mascota' => $mascota[0],
-            'dueno'   => $dueno[0],
-        ]);
+        return response()->json($mascota);
     }
 
     public function deletePet($id)
     {
-        \DB::statement('DELETE FROM mascotas WHERE id = ' . $id);
+        $mascota = Mascota::findOrFail($id);
+        $mascota->delete();
 
-        return response()->json('deleted');
+        return response()->json(null, 204);
     }
 
-    public function updatePet($id, Request $r)
+    public function updatePet($id, UpdateMascotaRequest $request)
     {
-        $fields = $r->all();
+        $mascota = Mascota::findOrFail($id);
+        $mascota->update($request->validated());
+        $mascota->load('propietario');
 
-        foreach ($fields as $campo => $valor) {
-            \DB::statement("UPDATE mascotas SET {$campo} = '{$valor}' WHERE id = {$id}");
-        }
-
-        return 200;
+        return response()->json($mascota);
     }
 }

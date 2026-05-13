@@ -13,9 +13,11 @@ return new class extends Migration
             $table->string('nombre');
             $table->string('especie');
             $table->string('raza')->nullable();
-            $table->integer('peso');
-            $table->date('fecha_nac');
-            $table->integer('id_propietario');
+            $table->decimal('peso', 8, 2);
+            $table->date('fecha_nacimiento');
+            $table->foreignId('propietario_id')->constrained('propietarios')->cascadeOnDelete();
+            $table->timestamps();
+            $table->softDeletes();
         });
     }
 
